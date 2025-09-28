@@ -4,6 +4,7 @@ import Navbar from './components/Layout/Navbar';
 import Dashboard from './components/Dashboard/Dashboard';
 import ProdutosList from './components/Produtos/ProdutosList';
 import VendasList from './components/Vendas/VendasList';
+import RelatoriosList from './components/Relatorios/RelatoriosList';
 import './App.css';
 
 function App() {
@@ -24,6 +25,9 @@ function App() {
             
             {/* Rota para vendas */}
             <Route path="/vendas" element={<VendasList />} />
+            
+            {/* Rota para relatórios */}
+            <Route path="/relatorios" element={<RelatoriosList />} />
             
             {/* Redirecionar rotas antigas para novas */}
             <Route path="/dashboard" element={<Navigate to="/" replace />} />

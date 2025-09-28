@@ -1,0 +1,473 @@
+/* ================================================
+   RELATÓRIOS - ESTILOS PRINCIPAIS
+   ================================================ */
+
+.relatorios-container {
+  padding: 20px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* ================================================
+   HEADER
+   ================================================ */
+
+.relatorios-header {
+  margin-bottom: 30px;
+  padding: 25px;
+  background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+  border-radius: 15px;
+  color: white;
+  box-shadow: 0 8px 32px rgba(111, 66, 193, 0.3);
+}
+
+.header-left h1 {
+  margin: 0 0 8px 0;
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* ================================================
+   GRID DE RELATÓRIOS
+   ================================================ */
+
+.relatorios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.relatorio-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.relatorio-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-color: #6f42c1;
+}
+
+/* ================================================
+   HEADER DO CARD
+   ================================================ */
+
+.card-header {
+  display: flex;
+  align-items: center;
+  padding: 25px;
+  border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin-right: 20px;
+  padding: 15px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  height: 70px;
+}
+
+.card-icon.vendas {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.card-icon.estoque {
+  background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+}
+
+.card-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.card-info p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* ================================================
+   FILTROS DO CARD
+   ================================================ */
+
+.card-filters {
+  padding: 25px;
+}
+
+.card-filters h4 {
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 10px;
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-date,
+.select-filter {
+  padding: 10px 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.input-date:focus,
+.select-filter:focus {
+  outline: none;
+  border-color: #6f42c1;
+  box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+}
+
+.checkbox-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #495057;
+  cursor: pointer;
+  user-select: none;
+  margin: 10px 0;
+}
+
+.checkbox-filter input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* ================================================
+   FILTROS RÁPIDOS
+   ================================================ */
+
+.quick-filters {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.btn-quick {
+  background: rgba(111, 66, 193, 0.1);
+  color: #6f42c1;
+  border: 2px solid rgba(111, 66, 193, 0.2);
+  padding: 6px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-quick:hover {
+  background: rgba(111, 66, 193, 0.2);
+  border-color: rgba(111, 66, 193, 0.4);
+  transform: translateY(-1px);
+}
+
+/* ================================================
+   AÇÕES DO CARD
+   ================================================ */
+
+.card-actions {
+  padding: 20px 25px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.btn-gerar {
+  background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 150px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-gerar:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(111, 66, 193, 0.3);
+}
+
+.btn-gerar:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-gerar.vendas {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.btn-gerar.vendas:hover:not(:disabled) {
+  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-gerar.estoque {
+  background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+}
+
+.btn-gerar.estoque:hover:not(:disabled) {
+  box-shadow: 0 5px 15px rgba(23, 162, 184, 0.3);
+}
+
+/* ================================================
+   INFORMAÇÕES ADICIONAIS
+   ================================================ */
+
+.relatorios-info {
+  margin-top: 30px;
+}
+
+.info-card {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #6f42c1;
+}
+
+.info-card h4 {
+  margin: 0 0 15px 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.info-card ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: none;
+}
+
+.info-card li {
+  margin: 8px 0;
+  font-size: 0.9rem;
+  color: #495057;
+  position: relative;
+}
+
+.info-card li::before {
+  content: '✓';
+  color: #28a745;
+  font-weight: bold;
+  position: absolute;
+  left: -20px;
+}
+
+/* ================================================
+   LOADING STATE
+   ================================================ */
+
+.relatorios-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #6f42c1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.relatorios-loading p {
+  color: #6c757d;
+  font-size: 1.2rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ================================================
+   RESPONSIVIDADE
+   ================================================ */
+
+@media (max-width: 768px) {
+  .relatorios-container {
+    padding: 15px;
+  }
+  
+  .relatorios-header {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .relatorios-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .relatorios-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .card-icon {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  
+  .filter-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-filters {
+    justify-content: center;
+  }
+  
+  .card-filters,
+  .card-actions {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .relatorios-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .card-icon {
+    font-size: 2.5rem;
+    min-width: 60px;
+    height: 60px;
+  }
+  
+  .card-info h3 {
+    font-size: 1.2rem;
+  }
+  
+  .card-info p {
+    font-size: 0.85rem;
+  }
+  
+  .btn-gerar {
+    width: 100%;
+    padding: 12px 20px;
+  }
+  
+  .quick-filters {
+    flex-direction: column;
+  }
+  
+  .btn-quick {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ================================================
+   ANIMAÇÕES
+   ================================================ */
+
+.relatorio-card {
+  animation: cardFadeIn 0.5s ease-out;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn-gerar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-gerar:hover::before {
+  left: 100%;
+}
+
+/* Efeito de pulse no ícone quando gerando */
+.btn-gerar:disabled .card-icon {
+  animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}

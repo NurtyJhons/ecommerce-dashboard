@@ -112,6 +112,15 @@ const Navbar = () => {
               <span className="nav-icon">💰</span>
               <span className="nav-text">Vendas</span>
             </Link>
+
+            <Link 
+              to="/relatorios" 
+              className={`nav-link ${isActive('/relatorios') ? 'ativo' : ''}`}
+              onClick={fecharMenu}
+            >
+              <span className="nav-icon">📄</span>
+              <span className="nav-text">Relatórios</span>
+            </Link>
           </div>
 
           {/* Informações no header */}

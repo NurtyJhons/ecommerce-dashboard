@@ -35,6 +35,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_weasyprint',
 ]
 
 THIRD_PARTY_APPS = [
@@ -103,8 +104,8 @@ DATABASES = {
         'HOST': config('DB_HOST', default=''),
         'PORT': config('DB_PORT', default=''),
         'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        } if config('DB_ENGINE', default='').startswith('django.db.backends.mysql') else {},
+            'client_encoding': 'UTF8',
+        } if config('DB_ENGINE', default='').startswith('django.db.backends.postgresql') else {},
     }
 }
 

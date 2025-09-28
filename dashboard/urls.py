@@ -34,6 +34,9 @@ urlpatterns = [
     path('dashboard/grafico-vendas/', views.grafico_vendas_api, name='api_grafico_vendas'),
     path('dashboard/grafico-produtos/', views.grafico_produtos_api, name='api_grafico_produtos'),
     path('dashboard/grafico-categorias/', views.grafico_categorias_api, name='api_grafico_categorias'),
+    path('relatorios/', views.relatorios_disponiveis_api, name='relatorios_disponiveis'),
+    path('relatorios/vendas/pdf/', views.relatorio_vendas_pdf, name='relatorio_vendas_pdf'),
+    path('relatorios/estoque/pdf/', views.relatorio_estoque_pdf, name='relatorio_estoque_pdf'),
 ]
 
 # ==========================================

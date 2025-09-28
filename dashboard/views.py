@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse 
 from django.db.models import Sum, Count, Q
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -9,6 +9,9 @@ from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.core.paginator import Paginator
+from django.template.loader import render_to_string
+from weasyprint import HTML, CSS
+import os
 
 from .models import Categoria, Produto, Venda, RelatorioVendas
 from .serializers import (
@@ -539,3 +542,337 @@ def grafico_categorias_api(request):
     
     serializer = GraficoCategoriaSerializer(dados_formatados, many=True)
     return Response(serializer.data)
+
+# =============================================
+# RELATÓRIO DE VENDAS PDF (WEASYPRINT)
+# =============================================
+
+@api_view(['GET'])
+def relatorio_vendas_pdf(request):
+    """Gera relatório de vendas em PDF usando WeasyPrint"""
+    try:
+        # Parâmetros de filtro
+        data_inicio = request.GET.get('data_inicio')
+        data_fim = request.GET.get('data_fim')
+        categoria_id = request.GET.get('categoria')
+        produto_id = request.GET.get('produto')
+        
+        # Filtros padrão (últimos 30 dias se não especificado)
+        if not data_inicio:
+            data_inicio = (timezone.now().date() - timedelta(days=30)).strftime('%Y-%m-%d')
+        if not data_fim:
+            data_fim = timezone.now().date().strftime('%Y-%m-%d')
+        
+        # Query base
+        vendas = Venda.objects.select_related('produto', 'produto__categoria').filter(
+            data_venda__date__gte=data_inicio,
+            data_venda__date__lte=data_fim
+        )
+        
+        # Aplicar filtros
+        if categoria_id:
+            vendas = vendas.filter(produto__categoria_id=categoria_id)
+        if produto_id:
+            vendas = vendas.filter(produto_id=produto_id)
+        
+        vendas = vendas.order_by('-data_venda')
+        
+        # Calcular totais
+        totais = vendas.aggregate(
+            total_valor=Sum('valor_total'),
+            total_quantidade=Sum('quantidade'),
+            total_vendas=Count('id')
+        )
+        
+        # Top produtos
+        top_produtos = vendas.values(
+            'produto__nome', 'produto__categoria__nome'
+        ).annotate(
+            total_vendido=Sum('quantidade'),
+            valor_total=Sum('valor_total')
+        ).order_by('-valor_total')[:10]
+        
+        # Preparar contexto
+        context = {
+            'vendas': vendas,
+            'totais': totais,
+            'top_produtos': top_produtos,
+            'data_inicio': data_inicio,
+            'data_fim': data_fim,
+            'data_geracao': timezone.now(),
+            'filtros': {
+                'categoria_id': categoria_id,
+                'produto_id': produto_id,
+            }
+        }
+        
+        # HTML simples inline (sem template por enquanto)
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Relatório de Vendas</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 40px; }}
+                .header {{ text-align: center; margin-bottom: 30px; }}
+                .titulo {{ color: #2c3e50; font-size: 24px; font-weight: bold; }}
+                .periodo {{ color: #7f8c8d; margin: 10px 0; }}
+                .resumo {{ background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }}
+                .resumo h3 {{ color: #495057; margin-top: 0; }}
+                .stat {{ display: inline-block; margin: 10px 20px; text-align: center; }}
+                .stat-valor {{ font-size: 18px; font-weight: bold; color: #28a745; }}
+                .stat-label {{ font-size: 12px; color: #6c757d; }}
+                table {{ width: 100%; border-collapse: collapse; margin: 20px 0; }}
+                th, td {{ border: 1px solid #dee2e6; padding: 8px; text-align: left; }}
+                th {{ background-color: #e9ecef; font-weight: bold; }}
+                .text-right {{ text-align: right; }}
+                .text-center {{ text-align: center; }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div class="titulo">🛒 Relatório de Vendas</div>
+                <div class="periodo">Período: {data_inicio} até {data_fim}</div>
+                <div class="periodo">Gerado em: {timezone.now().strftime('%d/%m/%Y %H:%M')}</div>
+            </div>
+            
+            <div class="resumo">
+                <h3>Resumo Executivo</h3>
+                <div class="stat">
+                    <div class="stat-valor">{totais['total_vendas'] or 0}</div>
+                    <div class="stat-label">Total Vendas</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-valor">R$ {(totais['total_valor'] or 0):,.2f}</div>
+                    <div class="stat-label">Faturamento</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-valor">{totais['total_quantidade'] or 0}</div>
+                    <div class="stat-label">Itens Vendidos</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-valor">R$ {((totais['total_valor'] or 0) / max(totais['total_vendas'] or 1, 1)):,.2f}</div>
+                    <div class="stat-label">Ticket Médio</div>
+                </div>
+            </div>
+            
+            <h3>Detalhes das Vendas</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Produto</th>
+                        <th>Categoria</th>
+                        <th class="text-center">Qtd</th>
+                        <th class="text-right">Preço Unit.</th>
+                        <th class="text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+        
+        # Adicionar linhas das vendas
+        for venda in vendas[:100]:  # Limitar a 100 vendas
+            html_content += f"""
+                    <tr>
+                        <td>{venda.data_venda.strftime('%d/%m/%Y')}</td>
+                        <td>{venda.produto.nome}</td>
+                        <td>{venda.produto.categoria.nome}</td>
+                        <td class="text-center">{venda.quantidade}</td>
+                        <td class="text-right">R$ {venda.preco_unitario:,.2f}</td>
+                        <td class="text-right">R$ {venda.valor_total:,.2f}</td>
+                    </tr>
+            """
+        
+        html_content += """
+                </tbody>
+            </table>
+        </body>
+        </html>
+        """
+        
+        # Gerar PDF com WeasyPrint
+        html = HTML(string=html_content)
+        pdf = html.write_pdf()
+        
+        # Resposta HTTP
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f'relatorio_vendas_{data_inicio}_{data_fim}.pdf'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+        
+    except Exception as e:
+        return Response({
+            'error': f'Erro ao gerar relatório: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# =============================================
+# RELATÓRIO DE ESTOQUE PDF (WEASYPRINT)
+# =============================================
+
+@api_view(['GET'])
+def relatorio_estoque_pdf(request):
+    """Gera relatório de estoque em PDF usando WeasyPrint"""
+    try:
+        # Parâmetros
+        apenas_baixo = request.GET.get('apenas_baixo', 'false').lower() == 'true'
+        categoria_id = request.GET.get('categoria')
+        
+        # Query base
+        produtos = Produto.objects.select_related('categoria').filter(ativo=True)
+        
+        # Filtros
+        if apenas_baixo:
+            produtos = produtos.filter(estoque__lt=10)
+        if categoria_id:
+            produtos = produtos.filter(categoria_id=categoria_id)
+        
+        produtos = produtos.order_by('estoque', 'nome')
+        
+        # Estatísticas
+        stats = {
+            'total_produtos': produtos.count(),
+            'produtos_sem_estoque': produtos.filter(estoque=0).count(),
+            'produtos_estoque_baixo': produtos.filter(estoque__lt=10, estoque__gt=0).count(),
+            'produtos_ok': produtos.filter(estoque__gte=10).count(),
+        }
+        
+        # HTML para estoque
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Relatório de Estoque</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 40px; }}
+                .header {{ text-align: center; margin-bottom: 30px; }}
+                .titulo {{ color: #2c3e50; font-size: 24px; font-weight: bold; }}
+                .data {{ color: #7f8c8d; margin: 10px 0; }}
+                .resumo {{ background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }}
+                .stat {{ display: inline-block; margin: 10px 20px; text-align: center; }}
+                .stat-valor {{ font-size: 18px; font-weight: bold; }}
+                .stat-label {{ font-size: 12px; color: #6c757d; }}
+                .ok {{ color: #28a745; }}
+                .baixo {{ color: #ffc107; }}
+                .sem {{ color: #dc3545; }}
+                table {{ width: 100%; border-collapse: collapse; margin: 20px 0; }}
+                th, td {{ border: 1px solid #dee2e6; padding: 8px; text-align: left; }}
+                th {{ background-color: #e9ecef; font-weight: bold; }}
+                .text-right {{ text-align: right; }}
+                .text-center {{ text-align: center; }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div class="titulo">📦 Relatório de Estoque</div>
+                <div class="data">Gerado em: {timezone.now().strftime('%d/%m/%Y %H:%M')}</div>
+            </div>
+            
+            <div class="resumo">
+                <h3>Resumo do Estoque</h3>
+                <div class="stat">
+                    <div class="stat-valor">{stats['total_produtos']}</div>
+                    <div class="stat-label">Total Produtos</div>
+                </div>
+                <div class="stat ok">
+                    <div class="stat-valor">{stats['produtos_ok']}</div>
+                    <div class="stat-label">Estoque OK</div>
+                </div>
+                <div class="stat baixo">
+                    <div class="stat-valor">{stats['produtos_estoque_baixo']}</div>
+                    <div class="stat-label">Estoque Baixo</div>
+                </div>
+                <div class="stat sem">
+                    <div class="stat-valor">{stats['produtos_sem_estoque']}</div>
+                    <div class="stat-label">Sem Estoque</div>
+                </div>
+            </div>
+            
+            <h3>Produtos</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Categoria</th>
+                        <th class="text-right">Preço</th>
+                        <th class="text-center">Estoque</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+        
+        # Adicionar produtos
+        for produto in produtos:
+            if produto.estoque == 0:
+                status_class = 'sem'
+                status_text = 'SEM ESTOQUE'
+            elif produto.estoque < 10:
+                status_class = 'baixo'
+                status_text = 'BAIXO'
+            else:
+                status_class = 'ok'
+                status_text = 'OK'
+                
+            html_content += f"""
+                    <tr>
+                        <td>{produto.nome}</td>
+                        <td>{produto.categoria.nome}</td>
+                        <td class="text-right">R$ {produto.preco:,.2f}</td>
+                        <td class="text-center">{produto.estoque}</td>
+                        <td class="text-center {status_class}">{status_text}</td>
+                    </tr>
+            """
+        
+        html_content += """
+                </tbody>
+            </table>
+        </body>
+        </html>
+        """
+        
+        # Gerar PDF
+        html = HTML(string=html_content)
+        pdf = html.write_pdf()
+        
+        response = HttpResponse(pdf, content_type='application/pdf')
+        filename = f'relatorio_estoque_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+        
+    except Exception as e:
+        return Response({
+            'error': f'Erro ao gerar relatório de estoque: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# =============================================
+# LISTA DE RELATÓRIOS DISPONÍVEIS
+# =============================================
+
+@api_view(['GET'])
+def relatorios_disponiveis_api(request):
+    """Lista todos os relatórios disponíveis"""
+    relatorios = [
+        {
+            'id': 'vendas',
+            'nome': 'Relatório de Vendas',
+            'descricao': 'Vendas por período com filtros e estatísticas',
+            'parametros': ['data_inicio', 'data_fim', 'categoria', 'produto'],
+            'url': '/api/relatorios/vendas/pdf/'
+        },
+        {
+            'id': 'estoque',
+            'nome': 'Relatório de Estoque',
+            'descricao': 'Status do estoque por produto e categoria',
+            'parametros': ['apenas_baixo', 'categoria'],
+            'url': '/api/relatorios/estoque/pdf/'
+        }
+    ]
+    
+    return Response(relatorios)
