@@ -55,7 +55,7 @@ ecommerce-dashboard/
 
 #### 1. Clone o repositório
 ```bash
-git clone https://github.com/SEU_USUARIO/ecommerce-dashboard.git
+git clone https://github.com/NurtyJhons/ecommerce-dashboard.git
 cd ecommerce-dashboard
 ```
 
@@ -91,7 +91,7 @@ python manage.py runserver
 #### 3. Setup Frontend (React)
 ```bash
 # Em outro terminal, navegar para frontend
-cd frontend
+cd ecommerce-dashboard-frontend
 
 # Instalar dependências
 npm install
@@ -172,7 +172,7 @@ GET /api/dashboard/grafico-categorias/       # Vendas por categoria
 ### Backend
 - **Django 4.2+**
 - **Django REST Framework**
-- **PostgreSQL** (produção) / SQLite (desenvolvimento)
+- **PostgreSQL** 
 - **django-cors-headers**
 
 ### Frontend
@@ -181,11 +181,6 @@ GET /api/dashboard/grafico-categorias/       # Vendas por categoria
 - **Chart.js**
 - **Axios**
 - **CSS Grid/Flexbox**
-
-### Deploy
-- **Docker** (opcional)
-- **Heroku** ready
-- **Vercel** ready (frontend)
 
 ## 📝 TODO / Roadmap
 
@@ -218,8 +213,8 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 **Seu Nome**
 - GitHub: [@seu-usuario](https://github.com/seu-usuario)
-- LinkedIn: [Seu Perfil](https://linkedin.com/in/seu-perfil)
-- Email: seu.email@exemplo.com
+- LinkedIn: [João Vitor](https://www.linkedin.com/in/joaocoelhot/)
+- Email: joaovitortargueta@gmail.com
 
 ## 🙏 Agradecimentos
 
@@ -227,7 +222,3 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 - **React** pela biblioteca reativa
 - **Chart.js** pelos gráficos interativos
 - **Comunidade open source** pelo suporte
-
----
-
-⭐ **Se este projeto te ajudou, deixe uma estrela!** ⭐
