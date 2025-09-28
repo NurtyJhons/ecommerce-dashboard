@@ -5,8 +5,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 import datetime
 
-from .models import Categoria, Produto, Venda, RelatorioVendas
-
+from .models import Categoria, Produto, Venda, RelatorioVendas, ConfiguracaoLoja
 
 # =============================================
 # CATEGORIA ADMIN
@@ -328,6 +327,137 @@ class VendasHojeFilter(admin.SimpleListFilter):
             inicio_mes = hoje.replace(day=1)
             return queryset.filter(data_venda__date__gte=inicio_mes)
 
+# Adicionar este admin ao final do seu admin.py
+
+# =============================================
+# CONFIGURAÇÃO DA LOJA ADMIN
+# =============================================
+
+@admin.register(ConfiguracaoLoja)
+class ConfiguracaoLojaAdmin(admin.ModelAdmin):
+    """Administração das Configurações da Loja"""
+    
+    # Exibição na lista
+    list_display = ['nome_empresa', 'cidade', 'uf', 'telefone', 'atualizado_em']
+    list_filter = ['uf', 'atualizado_em']
+    search_fields = ['nome_empresa', 'cidade', 'endereco', 'cnpj']
+    
+    # Layout do formulário
+    fieldsets = (
+        ('Dados da Empresa', {
+            'fields': ('nome_empresa', 'cnpj'),
+            'classes': ('wide',)
+        }),
+        ('Endereço', {
+            'fields': (
+                'cep', 
+                ('endereco', 'numero'), 
+                'complemento',
+                ('bairro', 'cidade', 'uf')
+            ),
+            'classes': ('wide',)
+        }),
+        ('Contato', {
+            'fields': ('telefone', 'email'),
+            'classes': ('wide',)
+        }),
+        ('Informações do Sistema', {
+            'fields': ('atualizado_em',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    readonly_fields = ['atualizado_em']
+    
+    # Customizações
+    def has_add_permission(self, request):
+        """Permitir adicionar apenas se não existir configuração"""
+        return not ConfiguracaoLoja.objects.exists()
+    
+    def has_delete_permission(self, request, obj=None):
+        """Não permitir deletar configurações"""
+        return False
+    
+    def changelist_view(self, request, extra_context=None):
+        """Customizar view da lista"""
+        extra_context = extra_context or {}
+        
+        # Se não há configuração, redirecionar para criar
+        if not ConfiguracaoLoja.objects.exists():
+            extra_context['no_config'] = True
+        
+        return super().changelist_view(request, extra_context)
+    
+    def save_model(self, request, obj, form, change):
+        """Customizar salvamento"""
+        # Se já existe uma configuração, atualizar ela ao invés de criar nova
+        if not change and ConfiguracaoLoja.objects.exists():
+            existing = ConfiguracaoLoja.objects.first()
+            for field in form.cleaned_data:
+                setattr(existing, field, form.cleaned_data[field])
+            existing.save()
+        else:
+            super().save_model(request, obj, form, change)
+    
+    # Actions customizadas
+    actions = ['testar_viacep']
+    
+    def testar_viacep(self, request, queryset):
+        """Action para testar integração ViaCEP"""
+        import requests
+        
+        success_count = 0
+        for config in queryset:
+            if config.cep:
+                try:
+                    cep_limpo = config.cep.replace('-', '')
+                    url = f"https://viacep.com.br/ws/{cep_limpo}/json/"
+                    response = requests.get(url, timeout=5)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        if 'erro' not in data:
+                            success_count += 1
+                
+                except:
+                    pass
+        
+        if success_count > 0:
+            self.message_user(
+                request, 
+                f'{success_count} configuração(ões) testada(s) com sucesso no ViaCEP.'
+            )
+        else:
+            self.message_user(
+                request, 
+                'Nenhuma configuração pôde ser testada no ViaCEP.',
+                level='WARNING'
+            )
+    
+    testar_viacep.short_description = "Testar CEPs no ViaCEP"
+    
+    # CSS personalizado
+    class Media:
+        css = {
+            'all': ('admin/css/configuracao_loja.css',)
+        }
+        js = ('admin/js/cep_autocomplete.js',)
+
+
+# =============================================
+# CUSTOMIZAÇÃO ADICIONAL DO ADMIN SITE
+# =============================================
+
+# Adicionar link rápido para configurações no admin index
+def get_admin_shortcuts(request):
+    """Atalhos personalizados no admin"""
+    return {
+        'configuracao_loja': ConfiguracaoLoja.objects.first(),
+        'tem_configuracao': ConfiguracaoLoja.objects.exists(),
+    }
+
+# Registrar contexto personalizado
+admin.site.admin_view(get_admin_shortcuts)
 
 # Adicionar filtros personalizados aos models
 ProdutoAdmin.list_filter.append(EstoqueBaixoFilter)

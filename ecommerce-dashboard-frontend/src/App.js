@@ -4,6 +4,7 @@ import Navbar from './components/Layout/Navbar';
 import Dashboard from './components/Dashboard/Dashboard';
 import ProdutosList from './components/Produtos/ProdutosList';
 import VendasList from './components/Vendas/VendasList';
+import ConfiguracoesList from './components/Configuracoes/ConfiguracoesList';
 import RelatoriosList from './components/Relatorios/RelatoriosList';
 import './App.css';
 
@@ -25,6 +26,9 @@ function App() {
             
             {/* Rota para vendas */}
             <Route path="/vendas" element={<VendasList />} />
+            
+            {/* Rota para configurações */}
+            <Route path="/configuracoes" element={<ConfiguracoesList />} />
             
             {/* Rota para relatórios */}
             <Route path="/relatorios" element={<RelatoriosList />} />

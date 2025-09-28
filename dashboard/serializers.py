@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from django.db import transaction
 from decimal import Decimal
-from .models import Categoria, Produto, Venda, RelatorioVendas
-
+from .models import Categoria, Produto, Venda, RelatorioVendas, ConfiguracaoLoja
 
 class CategoriaSerializer(serializers.ModelSerializer):
     """Serializer para o modelo Categoria"""
@@ -197,3 +196,52 @@ class GraficoCategoriaSerializer(serializers.Serializer):
     total_produtos = serializers.IntegerField()
     total_vendas = serializers.DecimalField(max_digits=15, decimal_places=2)
     quantidade_vendida = serializers.IntegerField()
+
+class ConfiguracaoLojaSerializer(serializers.ModelSerializer):
+    """Serializer para configurações da loja"""
+    
+    class Meta:
+        model = ConfiguracaoLoja
+        fields = [
+            'id', 'nome_empresa', 'cnpj', 'cep', 'endereco', 'numero',
+            'complemento', 'bairro', 'cidade', 'uf', 'telefone', 'email',
+            'atualizado_em'
+        ]
+        read_only_fields = ['id', 'atualizado_em']
+    
+    def validate_cep(self, value):
+        """Valida formato do CEP"""
+        import re
+        # Remove tudo que não é número
+        cep_limpo = re.sub(r'\D', '', value)
+        
+        if len(cep_limpo) != 8:
+            raise serializers.ValidationError("CEP deve ter 8 dígitos")
+        
+        # Retorna CEP formatado
+        return f"{cep_limpo[:5]}-{cep_limpo[5:]}"
+    
+    def validate_cnpj(self, value):
+        """Validação básica do CNPJ"""
+        if value:
+            import re
+            # Remove tudo que não é número
+            cnpj_limpo = re.sub(r'\D', '', value)
+            
+            if len(cnpj_limpo) != 14:
+                raise serializers.ValidationError("CNPJ deve ter 14 dígitos")
+            
+            # Retorna CNPJ formatado
+            return f"{cnpj_limpo[:2]}.{cnpj_limpo[2:5]}.{cnpj_limpo[5:8]}/{cnpj_limpo[8:12]}-{cnpj_limpo[12:]}"
+        
+        return value
+    
+    def validate(self, attrs):
+        """Validações gerais"""
+        # Campos obrigatórios
+        required_fields = ['nome_empresa', 'cep', 'endereco', 'cidade', 'uf']
+        for field in required_fields:
+            if not attrs.get(field):
+                raise serializers.ValidationError(f"Campo {field} é obrigatório")
+        
+        return attrs

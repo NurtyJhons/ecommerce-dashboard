@@ -82,7 +82,31 @@ export const relatoriosAPI = {
 };
 
 // =============================================
-// UTILITY FUNCTIONS PARA PDFs
+// CONFIGURAÇÕES API
+// =============================================
+
+export const configuracoesAPI = {
+  // Obter configurações da loja (singleton)
+  obter: () => api.get('/configuracoes/'),
+  
+  // Salvar/atualizar configurações
+  salvar: (data) => api.put('/configuracoes/', data),
+};
+
+// =============================================
+// VIACEP API
+// =============================================
+
+export const viacepAPI = {
+  // Buscar endereço por CEP
+  buscarCEP: (cep) => api.get(`/cep/${cep}/`),
+  
+  // Testar integração ViaCEP
+  testar: () => api.get('/teste-viacep/'),
+};
+
+// =============================================
+// UTILITY FUNCTIONS
 // =============================================
 
 export const downloadPDF = (blob, filename) => {
@@ -99,6 +123,59 @@ export const downloadPDF = (blob, filename) => {
   link.click();
   document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
+};
+
+// =============================================
+// FORMATAÇÃO E VALIDAÇÃO
+// =============================================
+
+export const formatters = {
+  // Formatar CEP (12345678 → 12345-678)
+  cep: (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length <= 5) return cleaned;
+    return cleaned.replace(/(\d{5})(\d{1,3})/, '$1-$2');
+  },
+  
+  // Formatar CNPJ (12345678000195 → 12.345.678/0001-95)
+  cnpj: (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    return cleaned
+      .replace(/(\d{2})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1/$2')
+      .replace(/(\d{4})(\d)/, '$1-$2')
+      .replace(/(-\d{2})\d+?$/, '$1');
+  },
+  
+  // Formatar telefone (11999999999 → (11) 99999-9999)
+  telefone: (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length <= 10) {
+      return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+    return cleaned.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  },
+};
+
+export const validators = {
+  // Validar CEP
+  cep: (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    return cleaned.length === 8;
+  },
+  
+  // Validar CNPJ básico
+  cnpj: (value) => {
+    const cleaned = value.replace(/\D/g, '');
+    return cleaned.length === 14;
+  },
+  
+  // Validar email
+  email: (value) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(value);
+  },
 };
 
 // =============================================

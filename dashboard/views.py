@@ -12,256 +12,16 @@ from django.core.paginator import Paginator
 from django.template.loader import render_to_string
 from weasyprint import HTML, CSS
 import os
+import requests
+import re
 
-from .models import Categoria, Produto, Venda, RelatorioVendas
+from .models import Categoria, Produto, Venda, RelatorioVendas, ConfiguracaoLoja
 from .serializers import (
     CategoriaSerializer, ProdutoListSerializer, ProdutoDetailSerializer,
     VendaListSerializer, VendaDetailSerializer, RelatorioVendasSerializer,
     DashboardStatsSerializer, GraficoVendasSerializer, GraficoProdutosSerializer,
-    GraficoCategoriaSerializer
+    GraficoCategoriaSerializer, ConfiguracaoLojaSerializer
 )
-
-
-# =============================================
-# VIEWS PARA TEMPLATES (Frontend HTML)
-# =============================================
-
-def dashboard_view(request):
-    """Página principal do dashboard"""
-    hoje = timezone.now().date()
-    inicio_mes = hoje.replace(day=1)
-    
-    # Estatísticas básicas
-    stats = {
-        'total_produtos': Produto.objects.filter(ativo=True).count(),
-        'produtos_estoque_baixo': Produto.objects.filter(ativo=True, estoque__lt=10).count(),
-        'vendas_hoje': Venda.objects.filter(data_venda__date=hoje).count(),
-        'valor_hoje': Venda.objects.filter(data_venda__date=hoje).aggregate(
-            total=Sum('valor_total'))['total'] or 0,
-        'vendas_mes': Venda.objects.filter(data_venda__date__gte=inicio_mes).count(),
-        'valor_mes': Venda.objects.filter(data_venda__date__gte=inicio_mes).aggregate(
-            total=Sum('valor_total'))['total'] or 0,
-    }
-    
-    # Produtos com estoque baixo
-    produtos_estoque_baixo = Produto.objects.filter(
-        ativo=True, estoque__lt=10
-    ).order_by('estoque')[:5]
-    
-    # Vendas recentes
-    vendas_recentes = Venda.objects.select_related('produto', 'produto__categoria').order_by('-data_venda')[:10]
-    
-    context = {
-        'stats': stats,
-        'produtos_estoque_baixo': produtos_estoque_baixo,
-        'vendas_recentes': vendas_recentes,
-    }
-    
-    return render(request, 'dashboard/dashboard.html', context)
-
-
-def produtos_lista_view(request):
-    """Lista de produtos com filtros"""
-    produtos = Produto.objects.select_related('categoria').filter(ativo=True)
-    
-    # Filtros
-    categoria_id = request.GET.get('categoria')
-    busca = request.GET.get('busca')
-    estoque_baixo = request.GET.get('estoque_baixo')
-    
-    if categoria_id:
-        produtos = produtos.filter(categoria_id=categoria_id)
-    
-    if busca:
-        produtos = produtos.filter(
-            Q(nome__icontains=busca) | Q(descricao__icontains=busca)
-        )
-    
-    if estoque_baixo:
-        produtos = produtos.filter(estoque__lt=10)
-    
-    produtos = produtos.order_by('-criado_em')
-    
-    # Paginação
-    paginator = Paginator(produtos, 15)
-    page = request.GET.get('page')
-    produtos_page = paginator.get_page(page)
-    
-    # Categorias para o filtro
-    categorias = Categoria.objects.filter(ativo=True).order_by('nome')
-    
-    context = {
-        'produtos': produtos_page,
-        'categorias': categorias,
-        'filtros': {
-            'categoria': categoria_id,
-            'busca': busca,
-            'estoque_baixo': estoque_baixo,
-        }
-    }
-    
-    return render(request, 'dashboard/produtos_lista.html', context)
-
-
-def produto_cadastro_view(request, produto_id=None):
-    """Cadastro/edição de produto"""
-    produto = get_object_or_404(Produto, id=produto_id) if produto_id else None
-    categorias = Categoria.objects.filter(ativo=True).order_by('nome')
-    
-    if request.method == 'POST':
-        try:
-            nome = request.POST.get('nome')
-            descricao = request.POST.get('descricao', '')
-            preco = float(request.POST.get('preco'))
-            estoque = int(request.POST.get('estoque'))
-            categoria_id = request.POST.get('categoria')
-            
-            categoria = get_object_or_404(Categoria, id=categoria_id)
-            
-            if produto:
-                # Atualizar produto existente
-                produto.nome = nome
-                produto.descricao = descricao
-                produto.preco = preco
-                produto.estoque = estoque
-                produto.categoria = categoria
-                produto.save()
-                messages.success(request, 'Produto atualizado com sucesso!')
-            else:
-                # Criar novo produto
-                produto = Produto.objects.create(
-                    nome=nome,
-                    descricao=descricao,
-                    preco=preco,
-                    estoque=estoque,
-                    categoria=categoria
-                )
-                messages.success(request, 'Produto cadastrado com sucesso!')
-            
-            return redirect('produtos_lista')
-            
-        except Exception as e:
-            messages.error(request, f'Erro ao salvar produto: {str(e)}')
-    
-    context = {
-        'produto': produto,
-        'categorias': categorias,
-    }
-    
-    return render(request, 'dashboard/produtos_cadastro.html', context)
-
-
-def vendas_lista_view(request):
-    """Lista de vendas com filtros"""
-    vendas = Venda.objects.select_related('produto', 'produto__categoria')
-    
-    # Filtros
-    produto_id = request.GET.get('produto')
-    categoria_id = request.GET.get('categoria')
-    data_inicio = request.GET.get('data_inicio')
-    data_fim = request.GET.get('data_fim')
-    
-    if produto_id:
-        vendas = vendas.filter(produto_id=produto_id)
-    
-    if categoria_id:
-        vendas = vendas.filter(produto__categoria_id=categoria_id)
-    
-    if data_inicio:
-        vendas = vendas.filter(data_venda__date__gte=data_inicio)
-    
-    if data_fim:
-        vendas = vendas.filter(data_venda__date__lte=data_fim)
-    
-    vendas = vendas.order_by('-data_venda')
-    
-    # Paginação
-    paginator = Paginator(vendas, 15)
-    page = request.GET.get('page')
-    vendas_page = paginator.get_page(page)
-    
-    # Dados para filtros
-    produtos = Produto.objects.filter(ativo=True).order_by('nome')
-    categorias = Categoria.objects.filter(ativo=True).order_by('nome')
-    
-    # Totais
-    total_valor = vendas.aggregate(total=Sum('valor_total'))['total'] or 0
-    total_quantidade = vendas.aggregate(total=Sum('quantidade'))['total'] or 0
-    
-    context = {
-        'vendas': vendas_page,
-        'produtos': produtos,
-        'categorias': categorias,
-        'total_valor': total_valor,
-        'total_quantidade': total_quantidade,
-        'filtros': {
-            'produto': produto_id,
-            'categoria': categoria_id,
-            'data_inicio': data_inicio,
-            'data_fim': data_fim,
-        }
-    }
-    
-    return render(request, 'dashboard/vendas_lista.html', context)
-
-
-def venda_cadastro_view(request, venda_id=None):
-    """Cadastro/edição de venda"""
-    venda = get_object_or_404(Venda, id=venda_id) if venda_id else None
-    produtos = Produto.objects.filter(ativo=True, estoque__gt=0).order_by('nome')
-    
-    if request.method == 'POST':
-        try:
-            produto_id = request.POST.get('produto')
-            quantidade = int(request.POST.get('quantidade'))
-            preco_unitario = request.POST.get('preco_unitario')
-            observacoes = request.POST.get('observacoes', '')
-            
-            produto = get_object_or_404(Produto, id=produto_id)
-            
-            # Se não informou preço unitário, usar o preço atual do produto
-            if not preco_unitario:
-                preco_unitario = produto.preco
-            else:
-                preco_unitario = float(preco_unitario)
-            
-            if venda:
-                # Editar venda existente (restaura estoque anterior)
-                produto_anterior = venda.produto
-                produto_anterior.estoque += venda.quantidade
-                produto_anterior.save()
-                
-                venda.produto = produto
-                venda.quantidade = quantidade
-                venda.preco_unitario = preco_unitario
-                venda.observacoes = observacoes
-                venda.save()
-                messages.success(request, 'Venda atualizada com sucesso!')
-            else:
-                # Nova venda
-                if produto.estoque < quantidade:
-                    raise ValueError(f'Estoque insuficiente. Disponível: {produto.estoque}')
-                
-                venda = Venda.objects.create(
-                    produto=produto,
-                    quantidade=quantidade,
-                    preco_unitario=preco_unitario,
-                    observacoes=observacoes
-                )
-                messages.success(request, 'Venda registrada com sucesso!')
-            
-            return redirect('vendas_lista')
-            
-        except Exception as e:
-            messages.error(request, f'Erro ao registrar venda: {str(e)}')
-    
-    context = {
-        'venda': venda,
-        'produtos': produtos,
-    }
-    
-    return render(request, 'dashboard/vendas_cadastro.html', context)
-
 
 # =============================================
 # API VIEWSETS (Django Rest Framework)
@@ -876,3 +636,156 @@ def relatorios_disponiveis_api(request):
     ]
     
     return Response(relatorios)
+
+# =============================================
+# CONFIGURAÇÕES DA LOJA
+# =============================================
+
+@api_view(['GET', 'PUT'])
+def configuracoes_loja_api(request):
+    """API para configurações da loja (Singleton)"""
+    try:
+        if request.method == 'GET':
+            # Buscar configuração existente (sempre a primeira/única)
+            configuracao = ConfiguracaoLoja.objects.first()
+            
+            if configuracao:
+                serializer = ConfiguracaoLojaSerializer(configuracao)
+                return Response(serializer.data)
+            else:
+                # Retorna estrutura vazia se não existe
+                return Response({
+                    'nome_empresa': '',
+                    'cnpj': '',
+                    'cep': '',
+                    'endereco': '',
+                    'numero': '',
+                    'complemento': '',
+                    'bairro': '',
+                    'cidade': '',
+                    'uf': '',
+                    'telefone': '',
+                    'email': '',
+                })
+        
+        elif request.method == 'PUT':
+            # Atualizar ou criar configuração
+            configuracao = ConfiguracaoLoja.objects.first()
+            
+            if configuracao:
+                # Atualizar existente
+                serializer = ConfiguracaoLojaSerializer(configuracao, data=request.data, partial=True)
+            else:
+                # Criar nova
+                serializer = ConfiguracaoLojaSerializer(data=request.data)
+            
+            if serializer.is_valid():
+                configuracao = serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    except Exception as e:
+        return Response({
+            'error': f'Erro ao processar configurações: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# =============================================
+# INTEGRAÇÃO VIACEP
+# =============================================
+
+@api_view(['GET'])
+def buscar_cep_api(request, cep):
+    """Busca endereço pelo CEP usando ViaCEP"""
+    try:
+        # Limpar CEP (remover tudo que não é número)
+        cep_limpo = re.sub(r'\D', '', cep)
+        
+        # Validar CEP
+        if len(cep_limpo) != 8:
+            return Response({
+                'error': 'CEP deve ter 8 dígitos'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Formatar CEP para consulta
+        cep_formatado = f"{cep_limpo[:5]}-{cep_limpo[5:]}"
+        
+        # Fazer requisição para ViaCEP
+        url = f"https://viacep.com.br/ws/{cep_limpo}/json/"
+        response = requests.get(url, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Verificar se CEP existe
+            if 'erro' in data:
+                return Response({
+                    'error': 'CEP não encontrado'
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            # Retornar dados formatados
+            return Response({
+                'cep': cep_formatado,
+                'endereco': data.get('logradouro', ''),
+                'bairro': data.get('bairro', ''),
+                'cidade': data.get('localidade', ''),
+                'uf': data.get('uf', ''),
+                'complemento': data.get('complemento', ''),
+                'success': True
+            })
+        
+        else:
+            return Response({
+                'error': 'Erro ao consultar CEP no serviço ViaCEP'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    
+    except requests.exceptions.Timeout:
+        return Response({
+            'error': 'Timeout ao consultar CEP - tente novamente'
+        }, status=status.HTTP_408_REQUEST_TIMEOUT)
+    
+    except requests.exceptions.RequestException as e:
+        return Response({
+            'error': f'Erro de conexão: {str(e)}'
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    
+    except Exception as e:
+        return Response({
+            'error': f'Erro interno: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# =============================================
+# TESTE VIACEP (ENDPOINT DE TESTE)
+# =============================================
+
+@api_view(['GET'])
+def teste_viacep_api(request):
+    """Endpoint para testar integração ViaCEP"""
+    try:
+        # Testar com CEP da Av. Paulista
+        cep_teste = "01310100"
+        url = f"https://viacep.com.br/ws/{cep_teste}/json/"
+        
+        response = requests.get(url, timeout=5)
+        
+        if response.status_code == 200:
+            data = response.json()
+            return Response({
+                'status': 'ViaCEP funcionando',
+                'exemplo': data,
+                'endpoint_busca': '/api/cep/{cep}/',
+                'exemplo_uso': '/api/cep/01310-100/'
+            })
+        else:
+            return Response({
+                'status': 'Erro no ViaCEP',
+                'codigo': response.status_code
+            })
+    
+    except Exception as e:
+        return Response({
+            'status': 'Erro',
+            'erro': str(e)
+        })

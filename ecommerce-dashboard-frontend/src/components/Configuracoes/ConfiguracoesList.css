@@ -1,0 +1,404 @@
+/* ================================================
+   CONFIGURAÇÕES DA LOJA - ESTILOS
+   ================================================ */
+
+.configuracoes-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  background: #f8f9fa;
+  min-height: calc(100vh - 70px);
+}
+
+.configuracoes-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.configuracoes-header h1 {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.configuracoes-header p {
+  color: #6c757d;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* ================================================
+   FORMULÁRIO DE CONFIGURAÇÕES
+   ================================================ */
+
+.configuracoes-form {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  overflow: hidden;
+  margin-bottom: 30px;
+}
+
+.form-section {
+  border-bottom: 1px solid #e9ecef;
+  padding: 30px;
+}
+
+.form-section:last-child {
+  border-bottom: none;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 25px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  flex: 1 1 100%;
+}
+
+.form-group.half-width {
+  flex: 1 1 48%;
+}
+
+.form-group.small-width {
+  flex: 1 1 30%;
+}
+
+.form-label {
+  color: #495057;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-label.required::after {
+  content: ' *';
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+.form-input {
+  padding: 12px 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.form-input:focus {
+  border-color: #28a745;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+.form-input.error {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+.form-input.loading {
+  background: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.error-text {
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+/* ================================================
+   CAMPO CEP ESPECIAL
+   ================================================ */
+
+.cep-input-container {
+  position: relative;
+}
+
+.cep-status {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+
+.cep-loading {
+  color: #ffc107;
+  animation: spin 1s linear infinite;
+}
+
+.cep-success {
+  color: #28a745;
+}
+
+.cep-error {
+  color: #e74c3c;
+}
+
+@keyframes spin {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* ================================================
+   BOTÕES E AÇÕES
+   ================================================ */
+
+.form-actions {
+  background: #f8f9fa;
+  padding: 25px 30px;
+  text-align: center;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn-salvar {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 200px;
+  justify-content: center;
+}
+
+.btn-salvar:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
+}
+
+.btn-salvar:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ================================================
+   INFORMAÇÕES ADICIONAIS
+   ================================================ */
+
+.configuracoes-info {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.info-card {
+  padding: 25px;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+}
+
+.info-card h4 {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.info-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-card li {
+  color: #495057;
+  margin-bottom: 8px;
+  padding-left: 20px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.info-card li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #28a745;
+  font-weight: bold;
+}
+
+.info-card strong {
+  color: #2c3e50;
+}
+
+/* ================================================
+   MENSAGENS DE FEEDBACK
+   ================================================ */
+
+.alert {
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.alert-success {
+  background: rgba(40, 167, 69, 0.1);
+  color: #155724;
+  border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.alert-error {
+  background: rgba(231, 76, 60, 0.1);
+  color: #721c24;
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.alert-info {
+  background: rgba(23, 162, 184, 0.1);
+  color: #0c5460;
+  border: 1px solid rgba(23, 162, 184, 0.2);
+}
+
+/* ================================================
+   RESPONSIVIDADE
+   ================================================ */
+
+@media (max-width: 768px) {
+  .configuracoes-container {
+    padding: 20px 15px;
+  }
+
+  .configuracoes-header h1 {
+    font-size: 2rem;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .form-group.half-width,
+  .form-group.small-width {
+    flex: 1 1 100%;
+  }
+
+  .form-section {
+    padding: 20px;
+  }
+
+  .form-actions {
+    padding: 20px;
+  }
+
+  .btn-salvar {
+    width: 100%;
+    max-width: none;
+  }
+
+  .info-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .configuracoes-container {
+    padding: 15px 10px;
+  }
+
+  .configuracoes-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .configuracoes-header p {
+    font-size: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .form-input {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .btn-salvar {
+    padding: 12px 30px;
+    font-size: 1rem;
+  }
+}
+
+/* ================================================
+   ANIMAÇÕES EXTRAS
+   ================================================ */
+
+.configuracoes-form {
+  animation: slideUp 0.5s ease-out;
+}
+
+.configuracoes-info {
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-input:focus,
+.btn-salvar:hover:not(:disabled) {
+  animation: pulse 0.3s ease-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}

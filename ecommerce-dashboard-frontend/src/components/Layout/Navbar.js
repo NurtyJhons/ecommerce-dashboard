@@ -114,6 +114,15 @@ const Navbar = () => {
             </Link>
 
             <Link 
+              to="/configuracoes" 
+              className={`nav-link ${isActive('/configuracoes') ? 'ativo' : ''}`}
+              onClick={fecharMenu}
+            >
+              <span className="nav-icon">⚙️</span>
+              <span className="nav-text">Configurações</span>
+            </Link>
+
+            <Link 
               to="/relatorios" 
               className={`nav-link ${isActive('/relatorios') ? 'ativo' : ''}`}
               onClick={fecharMenu}

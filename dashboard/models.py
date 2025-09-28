@@ -130,3 +130,24 @@ class RelatorioVendas(models.Model):
         
     def __str__(self):
         return f"Relatório {self.data} - R$ {self.total_vendas}"
+
+class ConfiguracaoLoja(models.Model):
+    # Dados da empresa
+    nome_empresa = models.CharField(max_length=200)
+    cnpj = models.CharField(max_length=18, blank=True)
+    
+    # Endereço (ViaCEP)
+    cep = models.CharField(max_length=9)
+    endereco = models.CharField(max_length=300)
+    numero = models.CharField(max_length=10, blank=True)
+    complemento = models.CharField(max_length=100, blank=True)
+    bairro = models.CharField(max_length=100)
+    cidade = models.CharField(max_length=100)
+    uf = models.CharField(max_length=2)
+    
+    # Contato
+    telefone = models.CharField(max_length=15, blank=True)
+    email = models.EmailField(blank=True)
+    
+    # Metadados
+    atualizado_em = models.DateTimeField(auto_now=True)
