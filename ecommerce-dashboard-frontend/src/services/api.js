@@ -42,14 +42,12 @@ export const dashboardAPI = {
 };
 
 export const relatoriosAPI = {
-  // Listar relatórios disponíveis
   listar: () => api.get('/relatorios/'),
   
-  // Gerar PDFs (retorna blob para download)
   gerarVendasPDF: (filtros = {}) => {
     const params = new URLSearchParams(filtros).toString();
     return api.get(`/relatorios/vendas/pdf/?${params}`, {
-      responseType: 'blob', // Importante para PDFs
+      responseType: 'blob',
     });
   },
   
@@ -80,7 +78,6 @@ export const viacepAPI = {
 
 export const downloadPDF = (blob, filename) => {
   /**
-   * Função utilitária para fazer download de PDFs
    * @param {Blob} blob - Blob do PDF retornado pela API
    * @param {string} filename - Nome do arquivo para download
    */
@@ -130,7 +127,7 @@ export const validators = {
     return cleaned.length === 8;
   },
   
-  // Validar CNPJ básico
+  // Validar CNPJ
   cnpj: (value) => {
     const cleaned = value.replace(/\D/g, '');
     return cleaned.length === 14;

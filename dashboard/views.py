@@ -111,11 +111,6 @@ class VendaViewSet(viewsets.ModelViewSet):
             return VendaListSerializer
         return VendaDetailSerializer
 
-
-# =============================================
-# VIEWS AJAX AUXILIARES
-# =============================================
-
 @api_view(['GET'])
 def ajax_produto_detalhes(request, produto_id):
     """Retorna detalhes do produto via AJAX"""
@@ -172,11 +167,6 @@ def ajax_verificar_estoque(request):
         return JsonResponse(data)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
-
-
-# =============================================
-# API VIEWS PARA DASHBOARD E GRÁFICOS
-# =============================================
 
 @api_view(['GET'])
 def dashboard_stats_api(request):
@@ -298,10 +288,6 @@ def grafico_categorias_api(request):
     
     serializer = GraficoCategoriaSerializer(dados_formatados, many=True)
     return Response(serializer.data)
-
-# =============================================
-# RELATÓRIO DE VENDAS PDF (WEASYPRINT)
-# =============================================
 
 @api_view(['GET'])
 def relatorio_vendas_pdf(request):
@@ -464,11 +450,6 @@ def relatorio_vendas_pdf(request):
             'error': f'Erro ao gerar relatório: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-# =============================================
-# RELATÓRIO DE ESTOQUE PDF (WEASYPRINT)
-# =============================================
-
 @api_view(['GET'])
 def relatorio_estoque_pdf(request):
     """Gera relatório de estoque em PDF usando WeasyPrint"""
@@ -606,11 +587,6 @@ def relatorio_estoque_pdf(request):
             'error': f'Erro ao gerar relatório de estoque: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-# =============================================
-# LISTA DE RELATÓRIOS DISPONÍVEIS
-# =============================================
-
 @api_view(['GET'])
 def relatorios_disponiveis_api(request):
     """Lista todos os relatórios disponíveis"""
@@ -632,10 +608,6 @@ def relatorios_disponiveis_api(request):
     ]
     
     return Response(relatorios)
-
-# =============================================
-# CONFIGURAÇÕES DA LOJA
-# =============================================
 
 @api_view(['GET', 'PUT'])
 def configuracoes_loja_api(request):
@@ -685,11 +657,6 @@ def configuracoes_loja_api(request):
         return Response({
             'error': f'Erro ao processar configurações: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# =============================================
-# INTEGRAÇÃO VIACEP
-# =============================================
 
 @api_view(['GET'])
 def buscar_cep_api(request, cep):
@@ -750,11 +717,6 @@ def buscar_cep_api(request, cep):
         return Response({
             'error': f'Erro interno: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# =============================================
-# TESTE VIACEP (ENDPOINT DE TESTE)
-# =============================================
 
 @api_view(['GET'])
 def teste_viacep_api(request):

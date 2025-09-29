@@ -292,7 +292,7 @@ const ConfiguracoesList = () => {
                   maxLength="9"
                   required
                 />
-                {buscandoCEP && <div className="input-loading">🔍</div>}
+                {buscandoCEP && <div className="input-loading"></div>}
               </div>
               {errors.cep && <span className="error-text">{errors.cep}</span>}
               <small>Digite o CEP para buscar automaticamente</small>

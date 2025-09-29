@@ -80,12 +80,12 @@ const Footer = () => {
       <div className="footer-content">
         <p>
           © 2025 E-commerce Dashboard. 
-          Desenvolvido com ❤️ usando React + Django
+          Desenvolvido com React + Django
         </p>
         <div className="footer-links">
           <span>v1.0.0</span>
           <span>•</span>
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/NurtyJhons" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
           <span>•</span>

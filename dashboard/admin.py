@@ -7,10 +7,6 @@ import datetime
 
 from .models import Categoria, Produto, Venda, RelatorioVendas, ConfiguracaoLoja
 
-# =============================================
-# CATEGORIA ADMIN
-# =============================================
-
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
     """Administração de Categorias"""
@@ -38,11 +34,6 @@ class CategoriaAdmin(admin.ModelAdmin):
         return '0 produtos'
     produtos_count.short_description = 'Produtos'
     produtos_count.admin_order_field = 'produtos__count'
-
-
-# =============================================
-# PRODUTO ADMIN
-# =============================================
 
 class VendaInline(admin.TabularInline):
     """Inline para mostrar vendas do produto"""
@@ -147,11 +138,6 @@ class ProdutoAdmin(admin.ModelAdmin):
         self.message_user(request, f'{updated} produtos marcados como inativos.')
     marcar_inativo.short_description = "Marcar selecionados como inativos"
 
-
-# =============================================
-# VENDA ADMIN
-# =============================================
-
 @admin.register(Venda)
 class VendaAdmin(admin.ModelAdmin):
     """Administração de Vendas"""
@@ -219,11 +205,6 @@ class VendaAdmin(admin.ModelAdmin):
         self.message_user(request, f'Exportação de {count} vendas preparada.')
     exportar_vendas.short_description = "Exportar vendas selecionadas"
 
-
-# =============================================
-# RELATÓRIO VENDAS ADMIN
-# =============================================
-
 @admin.register(RelatorioVendas)
 class RelatorioVendasAdmin(admin.ModelAdmin):
     """Administração de Relatórios de Vendas"""
@@ -257,11 +238,6 @@ class RelatorioVendasAdmin(admin.ModelAdmin):
         return 'R$ 0,00'
     ticket_medio.short_description = 'Ticket Médio'
 
-
-# =============================================
-# CUSTOMIZAÇÕES DO ADMIN SITE
-# =============================================
-
 # Personalizar o admin site
 admin.site.site_header = "E-commerce Dashboard"
 admin.site.site_title = "E-commerce Admin"
@@ -276,11 +252,6 @@ class AdminConfig:
             'all': ('admin/css/custom_admin.css',)
         }
         js = ('admin/js/custom_admin.js',)
-
-
-# =============================================
-# FILTROS PERSONALIZADOS
-# =============================================
 
 class EstoqueBaixoFilter(admin.SimpleListFilter):
     """Filtro para produtos com estoque baixo"""
@@ -326,12 +297,6 @@ class VendasHojeFilter(admin.SimpleListFilter):
         if self.value() == 'mes':
             inicio_mes = hoje.replace(day=1)
             return queryset.filter(data_venda__date__gte=inicio_mes)
-
-# Adicionar este admin ao final do seu admin.py
-
-# =============================================
-# CONFIGURAÇÃO DA LOJA ADMIN
-# =============================================
 
 @admin.register(ConfiguracaoLoja)
 class ConfiguracaoLojaAdmin(admin.ModelAdmin):
@@ -442,11 +407,6 @@ class ConfiguracaoLojaAdmin(admin.ModelAdmin):
             'all': ('admin/css/configuracao_loja.css',)
         }
         js = ('admin/js/cep_autocomplete.js',)
-
-
-# =============================================
-# CUSTOMIZAÇÃO ADICIONAL DO ADMIN SITE
-# =============================================
 
 # Adicionar link rápido para configurações no admin index
 def get_admin_shortcuts(request):
