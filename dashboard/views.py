@@ -23,10 +23,6 @@ from .serializers import (
     GraficoCategoriaSerializer, ConfiguracaoLojaSerializer
 )
 
-# =============================================
-# API VIEWSETS (Django Rest Framework)
-# =============================================
-
 class CategoriaViewSet(viewsets.ModelViewSet):
     """ViewSet para CRUD de Categorias"""
     queryset = Categoria.objects.all()

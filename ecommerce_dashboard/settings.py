@@ -12,10 +12,6 @@ from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# =============================================
-# SECURITY SETTINGS
-# =============================================
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-production-123456789')
 
@@ -23,10 +19,6 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-producti
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
-
-# =============================================
-# APPLICATION DEFINITION
-# =============================================
 
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -49,10 +41,6 @@ LOCAL_APPS = [
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
-# =============================================
-# MIDDLEWARE
-# =============================================
-
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -66,12 +54,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'ecommerce_dashboard.urls'
 
-# =============================================
-# TEMPLATES
-# =============================================
-
-# Como estamos usando React como frontend, os templates Django são opcionais
-# Mantemos configuração mínima apenas para Django Admin
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -89,11 +71,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'ecommerce_dashboard.wsgi.application'
-
-# =============================================
-# DATABASE
-# =============================================
-
 # Configuração de banco flexível (SQLite para desenvolvimento, PostgreSQL para produção)
 DATABASES = {
     'default': {
@@ -109,10 +86,6 @@ DATABASES = {
     }
 }
 
-# =============================================
-# PASSWORD VALIDATION
-# =============================================
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -127,10 +100,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
-# =============================================
-# INTERNATIONALIZATION
-# =============================================
 
 LANGUAGE_CODE = 'pt-br'
 TIME_ZONE = 'America/Sao_Paulo'
@@ -148,32 +117,14 @@ DATE_FORMAT = 'd/m/Y'
 DATETIME_FORMAT = 'd/m/Y H:i'
 SHORT_DATE_FORMAT = 'd/m/y'
 
-# =============================================
-# STATIC FILES (CSS, JavaScript, Images)
-# =============================================
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Remover STATICFILES_DIRS pois não usaremos templates Django
-# O React terá seu próprio build de arquivos estáticos
-# STATICFILES_DIRS = [
-#     BASE_DIR / 'static',
-# ]
 
 # Configuração de arquivos de mídia (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# =============================================
-# DEFAULT PRIMARY KEY FIELD TYPE
-# =============================================
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# =============================================
-# DJANGO REST FRAMEWORK
-# =============================================
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
@@ -196,10 +147,6 @@ REST_FRAMEWORK = {
     'DATETIME_FORMAT': '%d/%m/%Y %H:%M',
     'DATE_FORMAT': '%d/%m/%Y',
 }
-
-# =============================================
-# CORS HEADERS (Para React Frontend)
-# =============================================
 
 # Configuração específica para desenvolvimento com React
 CORS_ALLOWED_ORIGINS = [
@@ -232,10 +179,6 @@ CORS_ALLOWED_METHODS = [
     'POST',
     'PUT',
 ]
-
-# =============================================
-# LOGGING
-# =============================================
 
 LOGGING = {
     'version': 1,
@@ -280,10 +223,6 @@ LOGGING = {
 # Criar diretório de logs se não existir
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)
 
-# =============================================
-# CACHE CONFIGURATION
-# =============================================
-
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache' if DEBUG else 'django.core.cache.backends.redis.RedisCache',
@@ -294,10 +233,6 @@ CACHES = {
 # Cache timeout (15 minutos)
 CACHE_TTL = 60 * 15
 
-# =============================================
-# EMAIL CONFIGURATION
-# =============================================
-
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST', default='localhost')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
@@ -306,17 +241,9 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@ecommerce-dashboard.com')
 
-# =============================================
-# SESSION CONFIGURATION
-# =============================================
-
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 1 semana
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
-
-# =============================================
-# SECURITY SETTINGS (PRODUCTION)
-# =============================================
 
 if not DEBUG:
     # HTTPS Settings
@@ -336,10 +263,6 @@ if not DEBUG:
     SESSION_COOKIE_HTTPONLY = True
     CSRF_COOKIE_HTTPONLY = True
 
-# =============================================
-# CUSTOM SETTINGS (E-COMMERCE DASHBOARD)
-# =============================================
-
 # Configurações específicas do projeto
 ECOMMERCE_SETTINGS = {
     'ESTOQUE_MINIMO_ALERTA': 10,
@@ -355,10 +278,6 @@ ECOMMERCE_SETTINGS = {
 ALLOWED_FILE_TYPES = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv']
 MAX_UPLOAD_SIZE = 5 * 1024 * 1024  # 5MB
 
-# =============================================
-# DEVELOPMENT TOOLS
-# =============================================
-
 if DEBUG:
     try:
         import debug_toolbar
@@ -372,10 +291,6 @@ if DEBUG:
     except ImportError:
         pass
 
-# =============================================
-# MESSAGE FRAMEWORK
-# =============================================
-
 from django.contrib.messages import constants as messages
 
 MESSAGE_TAGS = {
@@ -386,47 +301,9 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',  # Bootstrap usa 'danger' ao invés de 'error'
 }
 
-# =============================================
-# CONFIGURAÇÃO DE BACKUP (OPCIONAL)
-# =============================================
-
 # Configurações para backups automáticos
 BACKUP_SETTINGS = {
     'ENABLED': config('BACKUP_ENABLED', default=False, cast=bool),
     'DIRECTORY': BASE_DIR / 'backups',
     'KEEP_DAYS': 30,
 }
-
-# =============================================
-# VARIÁVEIS DE AMBIENTE (.env file)
-# =============================================
-
-"""
-Crie um arquivo .env na raiz do projeto com:
-
-# Django
-SECRET_KEY=sua-chave-secreta-aqui
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com
-
-# Database (PostgreSQL example)
-DB_ENGINE=django.db.backends.postgresql
-DB_NAME=ecommerce_dashboard
-DB_USER=postgres
-DB_PASSWORD=senha123
-DB_HOST=localhost
-DB_PORT=5432
-
-# Email (Gmail example)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER=seu-email@gmail.com
-EMAIL_HOST_PASSWORD=sua-senha-app
-
-# Redis (para cache em produção)
-REDIS_URL=redis://127.0.0.1:6379/1
-
-# Backup
-BACKUP_ENABLED=False
-"""

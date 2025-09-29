@@ -9,10 +9,6 @@ const api = axios.create({
   }
 });
 
-// =============================================
-// PRODUTOS API
-// =============================================
-
 export const produtosAPI = {
   listar: (params = '') => api.get(`/produtos/${params}`),
   criar: (data) => api.post('/produtos/', data),
@@ -22,10 +18,6 @@ export const produtosAPI = {
   estoqueBaixo: () => api.get('/produtos/estoque_baixo/'),
 };
 
-// =============================================
-// VENDAS API
-// =============================================
-
 export const vendasAPI = {
   listar: (params = '') => api.get(`/vendas/${params}`),
   criar: (data) => api.post('/vendas/', data),
@@ -33,10 +25,6 @@ export const vendasAPI = {
   atualizar: (id, data) => api.put(`/vendas/${id}/`, data),
   deletar: (id) => api.delete(`/vendas/${id}/`),
 };
-
-// =============================================
-// CATEGORIAS API
-// =============================================
 
 export const categoriasAPI = {
   listar: (params = '') => api.get(`/categorias/${params}`),
@@ -46,20 +34,12 @@ export const categoriasAPI = {
   deletar: (id) => api.delete(`/categorias/${id}/`),
 };
 
-// =============================================
-// DASHBOARD API
-// =============================================
-
 export const dashboardAPI = {
   stats: () => api.get('/dashboard/stats/'),
   graficoVendas: (dias = 30) => api.get(`/dashboard/grafico-vendas/?dias=${dias}`),
   graficoProdutos: (limite = 10) => api.get(`/dashboard/grafico-produtos/?limite=${limite}`),
   graficoCategorias: () => api.get('/dashboard/grafico-categorias/'),
 };
-
-// =============================================
-// RELATÓRIOS API
-// =============================================
 
 export const relatoriosAPI = {
   // Listar relatórios disponíveis
@@ -81,9 +61,6 @@ export const relatoriosAPI = {
   },
 };
 
-// =============================================
-// CONFIGURAÇÕES API
-// =============================================
 
 export const configuracoesAPI = {
   // Obter configurações da loja (singleton)
@@ -93,10 +70,6 @@ export const configuracoesAPI = {
   salvar: (data) => api.put('/configuracoes/', data),
 };
 
-// =============================================
-// VIACEP API
-// =============================================
-
 export const viacepAPI = {
   // Buscar endereço por CEP
   buscarCEP: (cep) => api.get(`/cep/${cep}/`),
@@ -104,10 +77,6 @@ export const viacepAPI = {
   // Testar integração ViaCEP
   testar: () => api.get('/teste-viacep/'),
 };
-
-// =============================================
-// UTILITY FUNCTIONS
-// =============================================
 
 export const downloadPDF = (blob, filename) => {
   /**
@@ -124,10 +93,6 @@ export const downloadPDF = (blob, filename) => {
   document.body.removeChild(link);
   window.URL.revokeObjectURL(url);
 };
-
-// =============================================
-// FORMATAÇÃO E VALIDAÇÃO
-// =============================================
 
 export const formatters = {
   // Formatar CEP (12345678 → 12345-678)
@@ -178,18 +143,9 @@ export const validators = {
   },
 };
 
-// =============================================
-// INTERCEPTORS PARA TRATAMENTO DE ERROS
-// =============================================
-
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Adicionar token de autenticação se necessário
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
     return config;
   },
   (error) => {
